@@ -17,9 +17,10 @@ using System.Text;
 // Convert1DArrTo2D
 // AddArrays
 // MultiplyArray
+// DivideArray
 // Display
-// Identity
-// Transpose
+// Identity (I)
+// Transpose (T)
 // +
 // -
 // DotProduct
@@ -27,8 +28,10 @@ using System.Text;
 // ^ : need to support fractional powers
 // ++
 // --
+// ReducedEchelonForm (REF)
+// RowReducedEchelonForm (RREF)
+// PLUDecomposition (PLU)
 // IN PROGRESS:
-// LUDecomposition
 // Inverse
 
 namespace Matrix
@@ -77,7 +80,7 @@ namespace Matrix
         {
             if (index >= rows)
             {
-                Console.WriteLine("ERROR: Index out of bounds...");
+                Console.WriteLine("ERROR: RVal Index out of bounds...");
                 return null;
             }
             double[] rowVector = new double[columns];
@@ -92,7 +95,7 @@ namespace Matrix
         {
             if (index >= rows)
             {
-                Console.WriteLine("ERROR: Index out of bounds...");
+                Console.WriteLine("ERROR: RVec Index out of bounds...");
                 return null;
             }
 
@@ -109,7 +112,7 @@ namespace Matrix
         {
             if (index >= columns)
             {
-                Console.WriteLine("ERROR: Index out of bounds...");
+                Console.WriteLine("ERROR: CVal Index out of bounds...");
                 return null;
             }
             double[] colVector = new double[rows];
@@ -124,7 +127,7 @@ namespace Matrix
         {
             if (index >= columns)
             {
-                Console.WriteLine("ERROR: Index out of bounds...");
+                Console.WriteLine("ERROR: CVec Index out of bounds...");
                 return null;
             }
 
@@ -141,7 +144,7 @@ namespace Matrix
         {
             if (row1Index >= rows || row2Index >= rows)
             {
-                Console.WriteLine("ERROR: Index out of bounds...");
+                Console.WriteLine("ERROR: SR1 Index out of bounds...");
                 return;
             }
 
@@ -158,7 +161,7 @@ namespace Matrix
         {
             if (rowIndex >= rows)
             {
-                Console.WriteLine("ERROR: Index out of bounds...");
+                Console.WriteLine("ERROR: SR2 Index out of bounds...");
                 return;
             }
 
@@ -200,7 +203,7 @@ namespace Matrix
         {
             if (col1Index >= columns || col2Index >= columns)
             {
-                Console.WriteLine("ERROR: Index out of bounds...");
+                Console.WriteLine("ERROR: SC Index out of bounds...");
                 return;
             }
 
@@ -217,7 +220,7 @@ namespace Matrix
         {
             if (colIndex >= columns)
             {
-                Console.WriteLine("ERROR: Index out of bounds...");
+                Console.WriteLine("ERROR: SC2 Index out of bounds...");
                 return;
             }
 
@@ -326,7 +329,7 @@ namespace Matrix
         {
             if (index >= rows)
             {
-                Console.WriteLine("ERROR: Index out of bounds...");
+                Console.WriteLine("ERROR: RR Index out of bounds...");
                 return;
             }
             rows--;
@@ -416,7 +419,7 @@ namespace Matrix
         {
             if (index >= columns)
             {
-                Console.WriteLine("ERROR: Index out of bounds...");
+                Console.WriteLine("ERROR: RC Index out of bounds...");
                 return;
             }
             columns--;
@@ -501,7 +504,6 @@ namespace Matrix
             }
         }
 
-
         public static double[] MultiplyArray (double[] array, double scalar)
         {
             double[] product = array;
@@ -512,6 +514,15 @@ namespace Matrix
             return product;
         }
 
+        public static double[] DivideArray(double[] array, double scalar)
+        {
+            double[] quotient = array;
+            for (uint vectorIndex = 0; vectorIndex < array.Length; vectorIndex++)
+            {
+                quotient[vectorIndex] = quotient[vectorIndex] / scalar;
+            }
+            return quotient;
+        }
 
         public static void Display (double[] vector)
         {
@@ -549,9 +560,8 @@ namespace Matrix
 
                 for (uint colIndex = 0; colIndex < matrix.columns; colIndex++)
                 {
-                    Console.Write(matrix.values[rowIndex,colIndex] + "\t");
+                    Console.Write(matrix.values[rowIndex, colIndex].ToString("0.###") + "\t");
                 }
-
                 if (rowIndex == 0)
                 {
                     Console.WriteLine("┐");
@@ -585,6 +595,11 @@ namespace Matrix
             return identity;
         }
 
+        public static Matrix I (int dimensions)
+        {
+            return Identity(dimensions);
+        }
+
         public static Matrix Transpose (Matrix matrix)
         {
             double[,] transposeValues = new double[matrix.columns, matrix.rows];
@@ -597,6 +612,11 @@ namespace Matrix
             }
             Matrix transpose = new Matrix(transposeValues);
             return transpose;
+        }
+
+        public static Matrix T (Matrix matrix)
+        {
+            return Transpose(matrix);
         }
 
         public static Matrix operator + (Matrix lhsMatrix, Matrix rhsMatrix)
@@ -769,7 +789,7 @@ namespace Matrix
 
         public static Matrix operator ^ (Matrix matrix, uint scalar)
         {
-            Matrix product = matrix;
+            Matrix product = Copy(matrix);
             for (uint expIndex = 0; expIndex < scalar; expIndex++)
             {
                 product = product * matrix;
@@ -805,27 +825,208 @@ namespace Matrix
             return decrementedMatrix;
         }
 
+        public static Matrix ReducedEchelonForm (Matrix matrix)
+        {
+            Matrix ReducedEchelonForm = Copy(matrix);
+            uint colIndex = 0;
+            uint rowIndex = 0;
+            while (colIndex < ReducedEchelonForm.columns && rowIndex < ReducedEchelonForm.rows)
+            {
+                uint swapIndex = rowIndex + 1;
+                while (ReducedEchelonForm.values[rowIndex,colIndex] == 0)
+                {
+                    if (swapIndex >= ReducedEchelonForm.rows)
+                    {
+                        return ReducedEchelonForm;
+                    }
+                    if (ReducedEchelonForm.values[swapIndex,colIndex] != 0)
+                    {
+                        ReducedEchelonForm.SwapRows(rowIndex, swapIndex);
+                    }
+                    else
+                    {
+                        swapIndex++;
+                        if (swapIndex >= ReducedEchelonForm.rows)
+                        {
+                            swapIndex = rowIndex + 1;
+                            colIndex++;
+                            if (colIndex >= ReducedEchelonForm.columns)
+                            {
+                                return ReducedEchelonForm;
+                            }
+                        }
+                    }
+                }
+                double pivot = ReducedEchelonForm.values[rowIndex, colIndex];
+                ReducedEchelonForm.SwapRows(rowIndex, DivideArray(ReducedEchelonForm.RowValues(rowIndex), pivot));
+                for (uint elimIndex = rowIndex + 1; elimIndex < ReducedEchelonForm.rows; elimIndex++)
+                {
+                    if (ReducedEchelonForm.values[elimIndex,colIndex] != 0)
+                    {
+                        ReducedEchelonForm.SwapRows(elimIndex, AddArrays(ReducedEchelonForm.RowValues(elimIndex), MultiplyArray(ReducedEchelonForm.RowValues(rowIndex),-ReducedEchelonForm.values[elimIndex,colIndex])));
+                    }
+                }
+                colIndex++;
+                rowIndex++;
+            }
+            return ReducedEchelonForm;
+        }
+        public static Matrix REF(Matrix matrix)
+        {
+            return ReducedEchelonForm(matrix);
+        }
+
+        public static Matrix RowReducedEchelonForm(Matrix matrix)
+        {
+            Matrix RowReducedEchelonForm = Copy(matrix);
+            uint colIndex = 0;
+            uint rowIndex = 0;
+            while (colIndex < RowReducedEchelonForm.columns && rowIndex < RowReducedEchelonForm.rows)
+            {
+                uint swapIndex = rowIndex + 1;
+                while (RowReducedEchelonForm.values[rowIndex, colIndex] == 0)
+                {
+                    if (swapIndex >= RowReducedEchelonForm.rows)
+                    {
+                        return RowReducedEchelonForm;
+                    }
+                    if (RowReducedEchelonForm.values[swapIndex, colIndex] != 0)
+                    {
+                        RowReducedEchelonForm.SwapRows(rowIndex, swapIndex);
+                    }
+                    else
+                    {
+                        swapIndex++;
+                        if (swapIndex >= RowReducedEchelonForm.rows)
+                        {
+                            swapIndex = rowIndex + 1;
+                            colIndex++;
+                            if (colIndex >= RowReducedEchelonForm.columns)
+                            {
+                                return RowReducedEchelonForm;
+                            }
+                        }
+                    }
+                }
+                double pivot = RowReducedEchelonForm.values[rowIndex, colIndex];
+                RowReducedEchelonForm.SwapRows(rowIndex, DivideArray(RowReducedEchelonForm.RowValues(rowIndex), pivot));
+                for (uint elimIndex = 0; elimIndex < RowReducedEchelonForm.rows; elimIndex++)
+                {
+                    if (RowReducedEchelonForm.values[elimIndex, colIndex] != 0 && elimIndex != rowIndex)
+                    {
+                        RowReducedEchelonForm.SwapRows(elimIndex, AddArrays(RowReducedEchelonForm.RowValues(elimIndex), MultiplyArray(RowReducedEchelonForm.RowValues(rowIndex), -RowReducedEchelonForm.values[elimIndex, colIndex])));
+                    }
+                }
+                colIndex++;
+                rowIndex++;
+            }
+            return RowReducedEchelonForm;
+        }
+        public static Matrix RREF (Matrix matrix)
+        {
+            return RowReducedEchelonForm(matrix);
+        }
+
         public static (Matrix, Matrix, Matrix) PLUDecomposition (Matrix matrix)
         {
             Matrix PermutationMatrix = Identity(matrix.rows);
-            Matrix LowerTriangularMatrix = Identity(matrix.rows);
+            Matrix LowerTriangularMatrix;
+            if (matrix.rows > matrix.columns)
+            {
+                LowerTriangularMatrix = new Matrix(matrix.rows, matrix.columns);
+            }
+            else
+            {
+                LowerTriangularMatrix = new Matrix(matrix.rows, matrix.rows);
+            }
             Matrix UpperTriangularMatrix = Copy(matrix);
 
             for (uint colIndex = 0; colIndex < LowerTriangularMatrix.columns; colIndex++)
             {
+                uint pivotIndex = colIndex;
+                double pivotValue = UpperTriangularMatrix.values[colIndex, colIndex];
+                if (pivotValue < 0)
+                {
+                    pivotValue = pivotValue * -1;
+                }
                 for (uint rowIndex = colIndex + 1; rowIndex < LowerTriangularMatrix.rows; rowIndex++)
                 {
-                    while (UpperTriangularMatrix.values[colIndex,colIndex] == 0)
+                    double rowValue = UpperTriangularMatrix.values[rowIndex, colIndex];
+                    if (rowValue < 0)
                     {
-
+                        rowValue = rowValue * -1;
                     }
+                    if (pivotValue < rowValue)
+                    {
+                        pivotIndex = rowIndex;
+                        pivotValue = rowValue;
+                    }
+                }
+                if (pivotIndex != colIndex)
+                {
+                    PermutationMatrix.SwapRows(colIndex, pivotIndex);
+                    LowerTriangularMatrix.SwapRows(colIndex, pivotIndex);
+                    UpperTriangularMatrix.SwapRows(colIndex, pivotIndex);
+                }
+
+                LowerTriangularMatrix.values[colIndex, colIndex] = 1;
+                if (UpperTriangularMatrix.values[colIndex,colIndex] == 0)
+                {
+                    continue;
+                }
+
+                for (uint rowIndex = colIndex + 1; rowIndex < LowerTriangularMatrix.rows; rowIndex++)
+                {
                     double operation = -(UpperTriangularMatrix.values[rowIndex, colIndex] / UpperTriangularMatrix.values[colIndex, colIndex]);
                     LowerTriangularMatrix.values[rowIndex, colIndex] = -operation;
                     UpperTriangularMatrix.SwapRows(rowIndex, AddArrays(MultiplyArray(UpperTriangularMatrix.RowValues(colIndex), operation), UpperTriangularMatrix.RowValues(rowIndex)));
-                    Display(LowerTriangularMatrix);
                 }
             }
+
+            for (uint rowIndex = (uint)matrix.columns; rowIndex < matrix.rows; rowIndex++)
+            {
+                UpperTriangularMatrix.RemoveRow((uint)matrix.columns);
+            }
+            PermutationMatrix = Transpose(PermutationMatrix);
             return (PermutationMatrix, LowerTriangularMatrix, UpperTriangularMatrix);
+        }
+
+        public static (Matrix, Matrix, Matrix) PLU (Matrix matrix)
+        {
+            return PLUDecomposition(matrix);
+        }
+
+        public static Matrix Inverse (Matrix matrix)
+        {
+            if (matrix.rows != matrix.columns)
+            {
+                Console.WriteLine("ERROR: Non-square matrix not invertible...");
+                return null;
+            }
+
+            Matrix augment = Copy(matrix);
+            Matrix inverse = Identity(matrix.rows);
+
+            for (uint diagIndex = 0; diagIndex < matrix.rows; diagIndex++)
+            {
+                if (augment.values[diagIndex,diagIndex] == 0)
+                {
+                    Console.WriteLine("ERROR: Matrix not invertible...");
+                    return null;
+                }
+                inverse.SwapRows(diagIndex, DivideArray(inverse.RowValues(diagIndex), augment.values[diagIndex, diagIndex]));
+                augment.SwapRows(diagIndex, DivideArray(augment.RowValues(diagIndex), augment.values[diagIndex, diagIndex]));
+                for (uint rowIndex = 0; rowIndex < matrix.rows; rowIndex++)
+                {
+                    if(rowIndex == diagIndex)
+                    {
+                        continue;
+                    }
+                    inverse.SwapRows(rowIndex, AddArrays(inverse.RowValues(rowIndex), MultiplyArray(inverse.RowValues(diagIndex), -augment.values[rowIndex, diagIndex])));
+                    augment.SwapRows(rowIndex, AddArrays(augment.RowValues(rowIndex), (MultiplyArray(augment.RowValues(diagIndex), -augment.values[rowIndex,diagIndex]))));
+                }
+            }
+            return inverse;
         }
     }   
 }
