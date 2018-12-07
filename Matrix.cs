@@ -1090,6 +1090,12 @@ namespace Matrix
         // Determinant (Det): Returns the Determinant of a square matrix by LU decomposition
         public static double Determinant (Matrix matrix)
         {
+            if (matrix.rows != matrix.columns)
+            {
+                Console.WriteLine("ERROR: Non-square matrix does not have a determinant...");
+                return 0;
+            }
+
             double determinant = 1;
             Matrix UpperTriangularMatrix = Copy(matrix);
 
