@@ -2,37 +2,37 @@
 using System.Collections.Generic;
 using System.Text;
 
-// Constructor
-// Copy
-// RowValues
-// RowVector
-// ColumnValues
-// ColumnVector
-// SwapRows
-// SwapColumns
-// AddRow
-// RemoveRow
-// AddColumn
-// RemoveColumn
-// Convert1DArrTo2D
-// AddArrays
-// MultiplyArray
-// DivideArray
-// Display
-// Identity (I)
-// Transpose (T)
-// +
-// -
-// DotProduct
-// *
-// ^ : need to support fractional powers
-// ++
-// --
-// ReducedEchelonForm (REF)
-// RowReducedEchelonForm (RREF)
-// PLUDecomposition (PLU)
-// IN PROGRESS:
-// Inverse
+// Constructors : 45/52/60
+// Copy : 66
+// RowValues : 80
+// RowVector : 96
+// ColumnValues : 114
+// ColumnVector : 130
+// SwapRows : 148/166
+// SwapColumns : 209/227
+// AddRow : 270
+// RemoveRow : 338
+// AddColumn : 368
+// RemoveColumn : 430
+// Convert1DArrTo2D : 457
+// AddArrays : 499
+// MultiplyArray : 522
+// DivideArray : 533
+// Display : 544/556
+// Identity (I) : 600
+// Transpose (T) : 622
+// + : 641/666
+// - : 686/701/726/741
+// DotProduct : 756
+// * : 773/793
+// ^ : 816
+// ++ : 838
+// -- : 853
+// ReducedEchelonForm (REF) : 868
+// RowReducedEchelonForm (RREF) : 920
+// PLUDecomposition (PLU) : 972
+// Inverse (Inv) : 1041
+// Determinant (Det) : 1090
 
 namespace Matrix
 {
@@ -42,6 +42,7 @@ namespace Matrix
         private int columns;
         private double[,] values;
 
+        // Matrix Constructors
         public Matrix(double[,] matrixValues)
         {
             rows = matrixValues.GetLength(0);
@@ -63,6 +64,7 @@ namespace Matrix
             columns = 0;
         }
 
+        // Copy: copies the values of a matrix to create a new matrix with identical values.
         public static Matrix Copy (Matrix matrix)
         {
             Matrix copy = new Matrix(matrix.rows, matrix.columns);
@@ -76,11 +78,12 @@ namespace Matrix
             return copy;
         }
 
+        // RowValues: Returns the values in a given row of a matrix as an array
         public double[] RowValues (uint index)
         {
             if (index >= rows)
             {
-                Console.WriteLine("ERROR: RVal Index out of bounds...");
+                Console.WriteLine("ERROR: Index out of bounds...See double[] RowValues(uint index)");
                 return null;
             }
             double[] rowVector = new double[columns];
@@ -91,11 +94,12 @@ namespace Matrix
             return rowVector;
         }
 
+        // RowVector: Creates a Vector matrix from a given row of a matrix
         public Matrix RowVector(uint index)
         {
             if (index >= rows)
             {
-                Console.WriteLine("ERROR: RVec Index out of bounds...");
+                Console.WriteLine("ERROR: Index out of bounds...See Matrix RowVector(uint index)");
                 return null;
             }
 
@@ -108,11 +112,12 @@ namespace Matrix
             return vector;
         }
 
+        // ColumnValues: Returns the values in a given column of a matrix as an array
         public double[] ColumnValues (uint index)
         {
             if (index >= columns)
             {
-                Console.WriteLine("ERROR: CVal Index out of bounds...");
+                Console.WriteLine("ERROR: Index out of bounds...See double[] ColumnValues (uint index)");
                 return null;
             }
             double[] colVector = new double[rows];
@@ -123,11 +128,12 @@ namespace Matrix
             return colVector;
         }
 
-        public Matrix ColumnVector(uint index)
+        // ColumnVector: Creates a Vector matrix from a given column of a matrix
+        public Matrix ColumnVector (uint index)
         {
             if (index >= columns)
             {
-                Console.WriteLine("ERROR: CVec Index out of bounds...");
+                Console.WriteLine("ERROR: Index out of bounds...See Matrix ColumnVector (uint index)");
                 return null;
             }
 
@@ -140,11 +146,12 @@ namespace Matrix
             return vector;
         }
 
+        // SwapRows: Exchanges two rows of a matrix based on their indices
         public void SwapRows(uint row1Index, uint row2Index)
         {
             if (row1Index >= rows || row2Index >= rows)
             {
-                Console.WriteLine("ERROR: SR1 Index out of bounds...");
+                Console.WriteLine("ERROR: Index out of bounds...See SwapRows(uint row1Index, uint row2Index)");
                 return;
             }
 
@@ -157,11 +164,12 @@ namespace Matrix
             }
         }
 
+        // SwapRows: Swap a row of a matrix out for a new set of values in an array
         public void SwapRows(uint rowIndex, double[] newRow)
         {
             if (rowIndex >= rows)
             {
-                Console.WriteLine("ERROR: SR2 Index out of bounds...");
+                Console.WriteLine("ERROR: Index out of bounds...See SwapRows(uint rowIndex, double[] newRow)");
                 return;
             }
 
@@ -199,11 +207,12 @@ namespace Matrix
             }
         }
 
+        // SwapColumns: Exchanges two columns of a matrix based on their indices
         public void SwapColumns(uint col1Index, uint col2Index)
         {
             if (col1Index >= columns || col2Index >= columns)
             {
-                Console.WriteLine("ERROR: SC Index out of bounds...");
+                Console.WriteLine("ERROR: Index out of bounds...See void SwapColumns(uint col1Index, uint col2Index)");
                 return;
             }
 
@@ -216,11 +225,12 @@ namespace Matrix
             }
         }
 
+        // SwapColumns: Swap a column of a matrix out for a new set of values in an array
         public void SwapColumns(uint colIndex, double[] newColumn)
         {
             if (colIndex >= columns)
             {
-                Console.WriteLine("ERROR: SC2 Index out of bounds...");
+                Console.WriteLine("ERROR: Index out of bounds...See void SwapColumns(uint colIndex, double[] newColumn)");
                 return;
             }
 
@@ -258,6 +268,7 @@ namespace Matrix
             }
         }
 
+        // AddRow: Adds a row of new values from an array into an index of a matrix
         public void AddRow(int index, double[] newRow)
         {
             int vectorLength = newRow.Length;
@@ -324,12 +335,13 @@ namespace Matrix
 
             values = updatedValues;
         }
-        
+
+        // RemoveRow: Remove the row at an index from a matrix 
         public void RemoveRow(uint index)
         {
             if (index >= rows)
             {
-                Console.WriteLine("ERROR: RR Index out of bounds...");
+                Console.WriteLine("ERROR: Index out of bounds...See void RemoveRow(uint index)");
                 return;
             }
             rows--;
@@ -354,6 +366,7 @@ namespace Matrix
             values = updatedValues;
         }
 
+        // AddColumn: Adds a column of new values from an array into an index of a matrix
         public void AddColumn(int index, double[] newColumn)
         {
             int vectorLength = newColumn.Length;
@@ -415,11 +428,12 @@ namespace Matrix
             values = updatedValues;
         }
 
+        // RemoveColumn: Remove the column at an index from a matrix 
         public void RemoveColumn(uint index)
         {
             if (index >= columns)
             {
-                Console.WriteLine("ERROR: RC Index out of bounds...");
+                Console.WriteLine("ERROR: Index out of bounds...See void RemoveColumn(uint index)");
                 return;
             }
             columns--;
@@ -441,6 +455,7 @@ namespace Matrix
             values = updatedValues;
         }
 
+        // Convert1DArrTo2D: Converts single dimensional array into Row-by-Column 2-dimensional array
         public static double[,] Convert1DArrTo2D(uint inputRows, uint inputCols, double[] inputArray)
         {
             double[,] outputArray = new double[inputRows,inputCols];
@@ -482,6 +497,7 @@ namespace Matrix
             return outputArray;
         }
 
+        // AddArrays: Adds the values of two arrays to each other and returns the sum values in an array
         public static double[] AddArrays (double[] array1, double[] array2)
         {
             if (array1.Length > array2.Length)
@@ -504,6 +520,7 @@ namespace Matrix
             }
         }
 
+        // MultiplyArray: Multiplies each value of an array by a scalar and returns the results in a product array
         public static double[] MultiplyArray (double[] array, double scalar)
         {
             double[] product = array;
@@ -514,6 +531,7 @@ namespace Matrix
             return product;
         }
 
+        // DivideArray: Divides each value of an array by a scalar and returns the results in a quotient array
         public static double[] DivideArray(double[] array, double scalar)
         {
             double[] quotient = array;
@@ -524,6 +542,7 @@ namespace Matrix
             return quotient;
         }
 
+        // Display: Prints the values of an array/vector
         public static void Display (double[] vector)
         {
             Console.Write("[ ");
@@ -535,6 +554,7 @@ namespace Matrix
             Console.WriteLine("]");
         }
 
+        // Display: Prints the values of a matrix
         public static void Display (Matrix matrix)
         {
             if (matrix == null)
@@ -578,6 +598,7 @@ namespace Matrix
             }
         }
 
+        // Identity (I): Creates a dimension by dimension identity matrix
         public static Matrix Identity (int dimensions)
         {
             if (dimensions <= 0)
@@ -594,12 +615,12 @@ namespace Matrix
             Matrix identity = new Matrix(identityValues);
             return identity;
         }
-
         public static Matrix I (int dimensions)
         {
             return Identity(dimensions);
         }
 
+        // Transpose (T): Returns the transpose matrix of a given matrix
         public static Matrix Transpose (Matrix matrix)
         {
             double[,] transposeValues = new double[matrix.columns, matrix.rows];
@@ -613,12 +634,12 @@ namespace Matrix
             Matrix transpose = new Matrix(transposeValues);
             return transpose;
         }
-
         public static Matrix T (Matrix matrix)
         {
             return Transpose(matrix);
         }
 
+        // +: Adds two matrices
         public static Matrix operator + (Matrix lhsMatrix, Matrix rhsMatrix)
         {
             if (lhsMatrix.rows != rhsMatrix.rows || lhsMatrix.columns != rhsMatrix.columns)
@@ -643,6 +664,7 @@ namespace Matrix
             return sum;
         }
 
+        // +: Adds a scalar to each value of a matrix
         public static Matrix operator + (Matrix matrix, double scalar)
         {
             double[,] sumValues = new double[matrix.rows, matrix.columns];
@@ -656,13 +678,13 @@ namespace Matrix
             Matrix sum = new Matrix(sumValues);
             return sum;
         }
-
         public static Matrix operator + (double scalar, Matrix matrix)
         {
             Matrix sum = matrix + scalar;
             return sum;
         }
 
+        // -: Inverts the values of a matrix 
         public static Matrix operator - (Matrix matrix)
         {
             double[,] negValues = new double[matrix.rows, matrix.columns];
@@ -677,6 +699,7 @@ namespace Matrix
             return negative;
         }
 
+        // -: Subtracts a matrix from another matrix
         public static Matrix operator - (Matrix lhsMatrix, Matrix rhsMatrix)
         {
             if (lhsMatrix.rows != rhsMatrix.rows || lhsMatrix.columns != rhsMatrix.columns)
@@ -701,6 +724,7 @@ namespace Matrix
             return difference;
         }
 
+        // -: Subtract a scalar from each value of a matrix
         public static Matrix operator - (Matrix matrix, double scalar)
         {
             double[,] difValues = new double[matrix.rows, matrix.columns];
@@ -715,6 +739,7 @@ namespace Matrix
             return difference;
         }
 
+        // -: Subtract each value of a matrix from a scalar
         public static Matrix operator - (double scalar, Matrix matrix)
         {
             double[,] difValues = new double[matrix.rows, matrix.columns];
@@ -729,6 +754,7 @@ namespace Matrix
             return difference;
         }
 
+        // DotProduct: Returns the dot product of two arrays as a single array
         public static double DotProduct (double[] rowVector, double[] colVector)
         {
             if (rowVector.Length != colVector.Length)
@@ -745,6 +771,7 @@ namespace Matrix
             return dotProduct;
         }
 
+        // *: Multiply each value of a Matrix by a scalar
         public static Matrix operator * (Matrix matrix, double scalar)
         {
             double[,] productValues = new double[matrix.rows, matrix.columns];
@@ -758,13 +785,13 @@ namespace Matrix
             Matrix product = new Matrix(productValues);
             return product;
         }
-
         public static Matrix operator * (double scalar, Matrix matrix)
         {
             Matrix product = matrix * scalar;
             return product;
         }
 
+        // *: Multiply two matrices
         public static Matrix operator * (Matrix lhsMatrix, Matrix rhsMatrix)
         {
             if (lhsMatrix.columns != rhsMatrix.rows)
@@ -787,16 +814,29 @@ namespace Matrix
             return product;
         }
 
-        public static Matrix operator ^ (Matrix matrix, uint scalar)
+        // ^: Multiply a matrix by itself a scalar number of times
+        public static Matrix operator ^ (Matrix matrix, int scalar)
         {
-            Matrix product = Copy(matrix);
+            if (matrix.rows != matrix.columns)
+            {
+                Console.WriteLine("ERROR: Unable to take powers of non-square matrices...");
+                return null;
+            }
+            Matrix product = Identity(matrix.rows);
+            Matrix copy = Copy(matrix);
+            if (scalar < 0)
+            {
+                copy = Inverse(copy);
+                scalar = scalar * -1;
+            }
             for (uint expIndex = 0; expIndex < scalar; expIndex++)
             {
-                product = product * matrix;
+                product = product * copy;
             }
             return product;
         }
 
+        // ++: Increment each value of a matrix by 1
         public static Matrix operator ++ (Matrix matrix)
         {
             double[,] incValues = new double[matrix.rows, matrix.columns];
@@ -811,6 +851,7 @@ namespace Matrix
             return incrementedMatrix;
         }
 
+        // --: Decrement each value of a matrix by 1
         public static Matrix operator -- (Matrix matrix)
         {
             double[,] decValues = new double[matrix.rows, matrix.columns];
@@ -825,6 +866,7 @@ namespace Matrix
             return decrementedMatrix;
         }
 
+        // ReducedEchelonForm (REF): Returns the REF of a matrix through Gaussian Elimination
         public static Matrix ReducedEchelonForm (Matrix matrix)
         {
             Matrix ReducedEchelonForm = Copy(matrix);
@@ -876,6 +918,7 @@ namespace Matrix
             return ReducedEchelonForm(matrix);
         }
 
+        // RowReducedEchelonForm (RREF): Returns the RREF of a matrix through Gauss-Jordan Elimination
         public static Matrix RowReducedEchelonForm(Matrix matrix)
         {
             Matrix RowReducedEchelonForm = Copy(matrix);
@@ -927,6 +970,7 @@ namespace Matrix
             return RowReducedEchelonForm(matrix);
         }
 
+        // PLUDecomposition (PLU): Returns the Permutation Matrix, Lower Triangular Matrix, and Upper Triangular Matrix decomposition of a given Matrix as a tuple
         public static (Matrix, Matrix, Matrix) PLUDecomposition (Matrix matrix)
         {
             Matrix PermutationMatrix = Identity(matrix.rows);
@@ -990,12 +1034,12 @@ namespace Matrix
             PermutationMatrix = Transpose(PermutationMatrix);
             return (PermutationMatrix, LowerTriangularMatrix, UpperTriangularMatrix);
         }
-
         public static (Matrix, Matrix, Matrix) PLU (Matrix matrix)
         {
             return PLUDecomposition(matrix);
         }
 
+        // Inverse (Inv): Returns the Inverse of a matrix through Gauss-Jordan Elimination of an augmented matrix
         public static Matrix Inverse (Matrix matrix)
         {
             if (matrix.rows != matrix.columns)
@@ -1009,10 +1053,20 @@ namespace Matrix
 
             for (uint diagIndex = 0; diagIndex < matrix.rows; diagIndex++)
             {
-                if (augment.values[diagIndex,diagIndex] == 0)
+                uint swapIndex = diagIndex;
+                while (augment.values[diagIndex,diagIndex] == 0)
                 {
-                    Console.WriteLine("ERROR: Matrix not invertible...");
-                    return null;
+                    swapIndex++;
+                    if (swapIndex >= matrix.rows)
+                    {
+                        Console.WriteLine("ERROR: Matrix not invertible...");
+                        return null;
+                    }
+                    if (augment.values[swapIndex,diagIndex] != 0)
+                    {
+                        inverse.SwapRows(swapIndex, diagIndex);
+                        augment.SwapRows(swapIndex, diagIndex);
+                    }
                 }
                 inverse.SwapRows(diagIndex, DivideArray(inverse.RowValues(diagIndex), augment.values[diagIndex, diagIndex]));
                 augment.SwapRows(diagIndex, DivideArray(augment.RowValues(diagIndex), augment.values[diagIndex, diagIndex]));
@@ -1027,6 +1081,50 @@ namespace Matrix
                 }
             }
             return inverse;
+        }
+        public static Matrix Inv (Matrix matrix)
+        {
+            return Inverse(matrix);
+        }
+
+        // Determinant (Det): Returns the Determinant of a square matrix by LU decomposition
+        public static double Determinant (Matrix matrix)
+        {
+            double determinant = 1;
+            Matrix UpperTriangularMatrix = Copy(matrix);
+
+            for (uint diagIndex = 0; diagIndex < matrix.rows; diagIndex++)
+            {
+                uint swapIndex = diagIndex;
+                while (UpperTriangularMatrix.values[diagIndex, diagIndex] == 0)
+                {
+                    swapIndex++;
+                    if (swapIndex >= matrix.rows)
+                    {
+                        Console.WriteLine("ERROR: Matrix does not have determinant and is therefore not invertible...");
+                        return 0;
+                    }
+                    if (UpperTriangularMatrix.values[swapIndex, diagIndex] != 0)
+                    {
+                        UpperTriangularMatrix.SwapRows(swapIndex, diagIndex);
+                        determinant *= -1;
+                    }
+                }
+                for (uint rowIndex = diagIndex + 1; rowIndex < matrix.rows; rowIndex++)
+                {
+                    UpperTriangularMatrix.SwapRows(rowIndex, AddArrays(UpperTriangularMatrix.RowValues(rowIndex), (MultiplyArray(UpperTriangularMatrix.RowValues(diagIndex), -(UpperTriangularMatrix.values[rowIndex, diagIndex]/UpperTriangularMatrix.values[diagIndex,diagIndex])))));
+                }
+            }
+
+            for (uint diagIndex = 0; diagIndex < UpperTriangularMatrix.rows; diagIndex++)
+            {
+                determinant = determinant * UpperTriangularMatrix.values[diagIndex, diagIndex];
+            }
+            return determinant;
+        }
+        public static double Det (Matrix matrix)
+        {
+            return Determinant(matrix);
         }
     }   
 }
