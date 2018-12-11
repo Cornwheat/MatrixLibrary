@@ -1,38 +1,44 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Text;
 
 // Constructors : 45/52/60
-// Copy : 66
-// RowValues : 80
-// RowVector : 96
-// ColumnValues : 114
-// ColumnVector : 130
-// SwapRows : 148/166
-// SwapColumns : 209/227
-// AddRow : 270
-// RemoveRow : 338
-// AddColumn : 368
-// RemoveColumn : 430
-// Convert1DArrTo2D : 457
-// AddArrays : 499
-// MultiplyArray : 522
-// DivideArray : 533
-// Display : 544/556
-// Identity (I) : 600
-// Transpose (T) : 622
-// + : 641/666
-// - : 686/701/726/741
-// DotProduct : 756
-// * : 773/793
-// ^ : 816
-// ++ : 838
-// -- : 853
-// ReducedEchelonForm (REF) : 868
-// RowReducedEchelonForm (RREF) : 920
-// PLUDecomposition (PLU) : 972
-// Inverse (Inv) : 1041
-// Determinant (Det) : 1090
+// Rows : 68
+// Columns : 75
+// Values : 82
+// ReadCSV : 98
+// Copy : 145
+// RowValues : 159
+// RowVector : 175
+// ColumnValues : 193
+// ColumnVector : 209
+// SwapRows : 227/245
+// SwapColumns : 288/306
+// AddRow : 349
+// RemoveRow : 417
+// AddColumn : 447
+// RemoveColumn : 509
+// Convert1DArrTo2D : 536
+// AddArrays : 578
+// MultiplyArray : 601
+// DivideArray : 612
+// VectorLength : 624
+// Display : 636/648
+// Identity (I) : 692
+// Transpose (T) : 714
+// + : 733/758
+// - : 778/793/818/833
+// DotProduct : 848
+// * : 865/885
+// ^ : 908
+// ++ : 930
+// -- : 945
+// ReducedEchelonForm (REF) : 960
+// RowReducedEchelonForm (RREF) : 1005/1050
+// PLUDecomposition (PLU) : 1109
+// Inverse (Inv) : 1178
+// Determinant (Det) : 1226
 
 namespace Matrix
 {
@@ -64,6 +70,79 @@ namespace Matrix
             columns = 0;
         }
 
+        // Rows: Returns the number of rows of the matrix
+        public int Rows()
+        {
+            return rows;
+        }
+
+        // Columns: Returns the number of columns of the matrix
+        public int Columns()
+        {
+            return columns;
+        }
+
+        // Values: Returns the values of the matrix
+        public double[,] Values()
+        {
+            double[,] copyValues = new double[rows, columns];
+            for (uint rowIndex = 0; rowIndex < rows; rowIndex++)
+            {
+                for (uint colIndex = 0; colIndex < columns; colIndex++)
+                {
+                    copyValues[rowIndex, colIndex] = values[rowIndex, colIndex];
+                }
+            }
+            return copyValues;
+        }
+
+        // ReadCSV: Generates a matrix from a CSV dataset
+        public static Matrix ReadCSV (string path, bool header)
+        {
+            string[] fileContents = File.ReadAllLines(path);
+            int fileRows = fileContents.Length;
+            int numberOfRows = fileRows;
+            if (header == true)
+            {
+                numberOfRows--;
+            }
+            int numberOfColumns = fileContents[0].Split(',').Length;
+            Matrix data = new Matrix(numberOfRows,numberOfColumns);
+            uint dataIndex = 0;
+            for (int rowIndex = (header)?1:0; rowIndex < fileRows; rowIndex++)
+            {
+                string[] rowValues = fileContents[rowIndex].Split(',');
+                int columnCheck = fileContents[rowIndex].Split(',').Length;
+                if (columnCheck > numberOfColumns)
+                {
+                    Console.WriteLine("ERROR: Incorrect format in csv file at line {0}. Too many values: extra values in the row will be truncated...", rowIndex+1);
+                    columnCheck = numberOfColumns;
+                }
+                if (columnCheck < numberOfColumns)
+                {
+                    Console.WriteLine("ERROR: Incorrect format in csv file at line {0}. Not enough values: missing values will be subsituted with 0...", rowIndex+1);
+                }
+                for (uint colIndex = 0; colIndex < columnCheck; colIndex++)
+                {
+                    try
+                    {
+                        data.values[dataIndex,colIndex] = Convert.ToDouble(rowValues[colIndex]);
+                    }
+                    catch
+                    {
+                        Console.WriteLine("ERROR: Incorrect numeric format in csv file at line {0}. Values will be substituted with 0...", rowIndex+1);
+                        data.values[dataIndex, colIndex] = 0;
+                    }
+                }
+                for (int colIndex = columnCheck; colIndex < numberOfColumns; colIndex++)
+                {
+                    data.values[dataIndex, colIndex] = 0;
+                }
+                dataIndex++;
+            }
+            return data;
+        }
+
         // Copy: copies the values of a matrix to create a new matrix with identical values.
         public static Matrix Copy (Matrix matrix)
         {
@@ -79,7 +158,7 @@ namespace Matrix
         }
 
         // RowValues: Returns the values in a given row of a matrix as an array
-        public double[] RowValues (uint index)
+        public double[] RowValues(uint index)
         {
             if (index >= rows)
             {
@@ -106,14 +185,14 @@ namespace Matrix
             double[,] rowVector = new double[1, columns];
             for (uint colIndex = 0; colIndex < columns; colIndex++)
             {
-                rowVector[0,colIndex] = values[index, colIndex];
+                rowVector[0, colIndex] = values[index, colIndex];
             }
             Matrix vector = new Matrix(rowVector);
             return vector;
         }
 
         // ColumnValues: Returns the values in a given column of a matrix as an array
-        public double[] ColumnValues (uint index)
+        public double[] ColumnValues(uint index)
         {
             if (index >= columns)
             {
@@ -129,7 +208,7 @@ namespace Matrix
         }
 
         // ColumnVector: Creates a Vector matrix from a given column of a matrix
-        public Matrix ColumnVector (uint index)
+        public Matrix ColumnVector(uint index)
         {
             if (index >= columns)
             {
@@ -140,7 +219,7 @@ namespace Matrix
             double[,] colVector = new double[rows, 1];
             for (uint rowIndex = 0; rowIndex < rows; rowIndex++)
             {
-                colVector[rowIndex,0] = values[rowIndex,index];
+                colVector[rowIndex, 0] = values[rowIndex, index];
             }
             Matrix vector = new Matrix(colVector);
             return vector;
@@ -321,7 +400,7 @@ namespace Matrix
                 {
                     for (uint colIndex = 0; colIndex < columns; colIndex++)
                     {
-                        updatedValues[rowIndex, colIndex] = values[rowIndex-1, colIndex];
+                        updatedValues[rowIndex, colIndex] = values[rowIndex - 1, colIndex];
                     }
                 }
                 else
@@ -359,7 +438,7 @@ namespace Matrix
                 {
                     for (uint colIndex = 0; colIndex < columns; colIndex++)
                     {
-                        updatedValues[rowIndex, colIndex] = values[rowIndex+1, colIndex];
+                        updatedValues[rowIndex, colIndex] = values[rowIndex + 1, colIndex];
                     }
                 }
             }
@@ -448,7 +527,7 @@ namespace Matrix
                     }
                     else
                     {
-                        updatedValues[rowIndex, colIndex] = values[rowIndex, colIndex+1];
+                        updatedValues[rowIndex, colIndex] = values[rowIndex, colIndex + 1];
                     }
                 }
             }
@@ -458,10 +537,10 @@ namespace Matrix
         // Convert1DArrTo2D: Converts single dimensional array into Row-by-Column 2-dimensional array
         public static double[,] Convert1DArrTo2D(uint inputRows, uint inputCols, double[] inputArray)
         {
-            double[,] outputArray = new double[inputRows,inputCols];
+            double[,] outputArray = new double[inputRows, inputCols];
             uint arrayIndex = 0;
             int length = inputArray.Length;
-            
+
             if (length < inputRows * inputCols)
             {
                 Console.Write("Warning: Not enough values to satisfy ");
@@ -498,14 +577,14 @@ namespace Matrix
         }
 
         // AddArrays: Adds the values of two arrays to each other and returns the sum values in an array
-        public static double[] AddArrays (double[] array1, double[] array2)
+        public static double[] AddArrays(double[] array1, double[] array2)
         {
             if (array1.Length > array2.Length)
             {
                 double[] sumArray = array1;
                 for (uint vectorIndex = 0; vectorIndex < array2.Length; vectorIndex++)
                 {
-                    sumArray[vectorIndex] += array2[vectorIndex]; 
+                    sumArray[vectorIndex] += array2[vectorIndex];
                 }
                 return sumArray;
             }
@@ -521,7 +600,7 @@ namespace Matrix
         }
 
         // MultiplyArray: Multiplies each value of an array by a scalar and returns the results in a product array
-        public static double[] MultiplyArray (double[] array, double scalar)
+        public static double[] MultiplyArray(double[] array, double scalar)
         {
             double[] product = array;
             for (uint vectorIndex = 0; vectorIndex < array.Length; vectorIndex++)
@@ -542,8 +621,20 @@ namespace Matrix
             return quotient;
         }
 
+        // VectorLength: Returns the length of a given vector passed as a single dimensional array
+        public static double VectorLength(double[] vector)
+        {
+            double length = 0;
+            for (uint vectorIndex = 0; vectorIndex < vector.Length; vectorIndex++)
+            {
+                length += (vector[vectorIndex] * vector[vectorIndex]);
+            }
+            length = Math.Sqrt(length);
+            return length;
+        }
+
         // Display: Prints the values of an array/vector
-        public static void Display (double[] vector)
+        public static void Display(double[] vector)
         {
             Console.Write("[ ");
             int vectorLength = vector.Length;
@@ -555,7 +646,7 @@ namespace Matrix
         }
 
         // Display: Prints the values of a matrix
-        public static void Display (Matrix matrix)
+        public static void Display(Matrix matrix)
         {
             if (matrix == null)
             {
@@ -580,7 +671,7 @@ namespace Matrix
 
                 for (uint colIndex = 0; colIndex < matrix.columns; colIndex++)
                 {
-                    Console.Write(matrix.values[rowIndex, colIndex].ToString("0.###") + "\t");
+                    Console.Write(matrix.values[rowIndex, colIndex].ToString("0.########") + "\t\t");
                 }
                 if (rowIndex == 0)
                 {
@@ -599,7 +690,7 @@ namespace Matrix
         }
 
         // Identity (I): Creates a dimension by dimension identity matrix
-        public static Matrix Identity (int dimensions)
+        public static Matrix Identity(int dimensions)
         {
             if (dimensions <= 0)
             {
@@ -607,7 +698,7 @@ namespace Matrix
                 return null;
             }
 
-            double[,] identityValues = new double[dimensions,dimensions];
+            double[,] identityValues = new double[dimensions, dimensions];
             for (uint diagonalIndex = 0; diagonalIndex < dimensions; diagonalIndex++)
             {
                 identityValues[diagonalIndex, diagonalIndex] = 1;
@@ -615,32 +706,32 @@ namespace Matrix
             Matrix identity = new Matrix(identityValues);
             return identity;
         }
-        public static Matrix I (int dimensions)
+        public static Matrix I(int dimensions)
         {
             return Identity(dimensions);
         }
 
         // Transpose (T): Returns the transpose matrix of a given matrix
-        public static Matrix Transpose (Matrix matrix)
+        public static Matrix Transpose(Matrix matrix)
         {
             double[,] transposeValues = new double[matrix.columns, matrix.rows];
             for (uint rowIndex = 0; rowIndex < matrix.rows; rowIndex++)
             {
                 for (uint colIndex = 0; colIndex < matrix.columns; colIndex++)
                 {
-                    transposeValues[colIndex, rowIndex] = matrix.values[rowIndex,colIndex];
+                    transposeValues[colIndex, rowIndex] = matrix.values[rowIndex, colIndex];
                 }
             }
             Matrix transpose = new Matrix(transposeValues);
             return transpose;
         }
-        public static Matrix T (Matrix matrix)
+        public static Matrix T(Matrix matrix)
         {
             return Transpose(matrix);
         }
 
         // +: Adds two matrices
-        public static Matrix operator + (Matrix lhsMatrix, Matrix rhsMatrix)
+        public static Matrix operator +(Matrix lhsMatrix, Matrix rhsMatrix)
         {
             if (lhsMatrix.rows != rhsMatrix.rows || lhsMatrix.columns != rhsMatrix.columns)
             {
@@ -656,7 +747,7 @@ namespace Matrix
             {
                 for (uint colIndex = 0; colIndex < sumCols; colIndex++)
                 {
-                    sumValues[rowIndex, colIndex] = lhsMatrix.values[rowIndex, colIndex] + rhsMatrix.values[rowIndex,colIndex];
+                    sumValues[rowIndex, colIndex] = lhsMatrix.values[rowIndex, colIndex] + rhsMatrix.values[rowIndex, colIndex];
                 }
             }
 
@@ -665,7 +756,7 @@ namespace Matrix
         }
 
         // +: Adds a scalar to each value of a matrix
-        public static Matrix operator + (Matrix matrix, double scalar)
+        public static Matrix operator +(Matrix matrix, double scalar)
         {
             double[,] sumValues = new double[matrix.rows, matrix.columns];
             for (uint rowIndex = 0; rowIndex < matrix.rows; rowIndex++)
@@ -678,14 +769,14 @@ namespace Matrix
             Matrix sum = new Matrix(sumValues);
             return sum;
         }
-        public static Matrix operator + (double scalar, Matrix matrix)
+        public static Matrix operator +(double scalar, Matrix matrix)
         {
             Matrix sum = matrix + scalar;
             return sum;
         }
 
         // -: Inverts the values of a matrix 
-        public static Matrix operator - (Matrix matrix)
+        public static Matrix operator -(Matrix matrix)
         {
             double[,] negValues = new double[matrix.rows, matrix.columns];
             for (uint rowIndex = 0; rowIndex < matrix.rows; rowIndex++)
@@ -700,7 +791,7 @@ namespace Matrix
         }
 
         // -: Subtracts a matrix from another matrix
-        public static Matrix operator - (Matrix lhsMatrix, Matrix rhsMatrix)
+        public static Matrix operator -(Matrix lhsMatrix, Matrix rhsMatrix)
         {
             if (lhsMatrix.rows != rhsMatrix.rows || lhsMatrix.columns != rhsMatrix.columns)
             {
@@ -725,7 +816,7 @@ namespace Matrix
         }
 
         // -: Subtract a scalar from each value of a matrix
-        public static Matrix operator - (Matrix matrix, double scalar)
+        public static Matrix operator -(Matrix matrix, double scalar)
         {
             double[,] difValues = new double[matrix.rows, matrix.columns];
             for (uint rowIndex = 0; rowIndex < matrix.rows; rowIndex++)
@@ -740,7 +831,7 @@ namespace Matrix
         }
 
         // -: Subtract each value of a matrix from a scalar
-        public static Matrix operator - (double scalar, Matrix matrix)
+        public static Matrix operator -(double scalar, Matrix matrix)
         {
             double[,] difValues = new double[matrix.rows, matrix.columns];
             for (uint rowIndex = 0; rowIndex < matrix.rows; rowIndex++)
@@ -755,7 +846,7 @@ namespace Matrix
         }
 
         // DotProduct: Returns the dot product of two arrays as a single array
-        public static double DotProduct (double[] rowVector, double[] colVector)
+        public static double DotProduct(double[] rowVector, double[] colVector)
         {
             if (rowVector.Length != colVector.Length)
             {
@@ -772,7 +863,7 @@ namespace Matrix
         }
 
         // *: Multiply each value of a Matrix by a scalar
-        public static Matrix operator * (Matrix matrix, double scalar)
+        public static Matrix operator *(Matrix matrix, double scalar)
         {
             double[,] productValues = new double[matrix.rows, matrix.columns];
             for (uint rowIndex = 0; rowIndex < matrix.rows; rowIndex++)
@@ -785,14 +876,14 @@ namespace Matrix
             Matrix product = new Matrix(productValues);
             return product;
         }
-        public static Matrix operator * (double scalar, Matrix matrix)
+        public static Matrix operator *(double scalar, Matrix matrix)
         {
             Matrix product = matrix * scalar;
             return product;
         }
 
         // *: Multiply two matrices
-        public static Matrix operator * (Matrix lhsMatrix, Matrix rhsMatrix)
+        public static Matrix operator *(Matrix lhsMatrix, Matrix rhsMatrix)
         {
             if (lhsMatrix.columns != rhsMatrix.rows)
             {
@@ -815,7 +906,7 @@ namespace Matrix
         }
 
         // ^: Multiply a matrix by itself a scalar number of times
-        public static Matrix operator ^ (Matrix matrix, int scalar)
+        public static Matrix operator ^(Matrix matrix, int scalar)
         {
             if (matrix.rows != matrix.columns)
             {
@@ -837,7 +928,7 @@ namespace Matrix
         }
 
         // ++: Increment each value of a matrix by 1
-        public static Matrix operator ++ (Matrix matrix)
+        public static Matrix operator ++(Matrix matrix)
         {
             double[,] incValues = new double[matrix.rows, matrix.columns];
             for (uint rowIndex = 0; rowIndex < matrix.rows; rowIndex++)
@@ -852,7 +943,7 @@ namespace Matrix
         }
 
         // --: Decrement each value of a matrix by 1
-        public static Matrix operator -- (Matrix matrix)
+        public static Matrix operator --(Matrix matrix)
         {
             double[,] decValues = new double[matrix.rows, matrix.columns];
             for (uint rowIndex = 0; rowIndex < matrix.rows; rowIndex++)
@@ -867,45 +958,38 @@ namespace Matrix
         }
 
         // ReducedEchelonForm (REF): Returns the REF of a matrix through Gaussian Elimination
-        public static Matrix ReducedEchelonForm (Matrix matrix)
+        public static Matrix ReducedEchelonForm(Matrix matrix)
         {
             Matrix ReducedEchelonForm = Copy(matrix);
             uint colIndex = 0;
             uint rowIndex = 0;
             while (colIndex < ReducedEchelonForm.columns && rowIndex < ReducedEchelonForm.rows)
             {
-                uint swapIndex = rowIndex + 1;
-                while (ReducedEchelonForm.values[rowIndex,colIndex] == 0)
+                uint swapIndex = rowIndex;
+                while (ReducedEchelonForm.values[rowIndex, colIndex] == 0)
                 {
+                    swapIndex++;
                     if (swapIndex >= ReducedEchelonForm.rows)
                     {
-                        return ReducedEchelonForm;
+                        swapIndex = rowIndex;
+                        colIndex++;
+                        if (colIndex >= ReducedEchelonForm.columns)
+                        {
+                            return ReducedEchelonForm;
+                        }
                     }
-                    if (ReducedEchelonForm.values[swapIndex,colIndex] != 0)
+                    if (ReducedEchelonForm.values[swapIndex, colIndex] != 0)
                     {
                         ReducedEchelonForm.SwapRows(rowIndex, swapIndex);
-                    }
-                    else
-                    {
-                        swapIndex++;
-                        if (swapIndex >= ReducedEchelonForm.rows)
-                        {
-                            swapIndex = rowIndex + 1;
-                            colIndex++;
-                            if (colIndex >= ReducedEchelonForm.columns)
-                            {
-                                return ReducedEchelonForm;
-                            }
-                        }
                     }
                 }
                 double pivot = ReducedEchelonForm.values[rowIndex, colIndex];
                 ReducedEchelonForm.SwapRows(rowIndex, DivideArray(ReducedEchelonForm.RowValues(rowIndex), pivot));
                 for (uint elimIndex = rowIndex + 1; elimIndex < ReducedEchelonForm.rows; elimIndex++)
                 {
-                    if (ReducedEchelonForm.values[elimIndex,colIndex] != 0)
+                    if (ReducedEchelonForm.values[elimIndex, colIndex] != 0)
                     {
-                        ReducedEchelonForm.SwapRows(elimIndex, AddArrays(ReducedEchelonForm.RowValues(elimIndex), MultiplyArray(ReducedEchelonForm.RowValues(rowIndex),-ReducedEchelonForm.values[elimIndex,colIndex])));
+                        ReducedEchelonForm.SwapRows(elimIndex, AddArrays(ReducedEchelonForm.RowValues(elimIndex), MultiplyArray(ReducedEchelonForm.RowValues(rowIndex), -ReducedEchelonForm.values[elimIndex, colIndex])));
                     }
                 }
                 colIndex++;
@@ -926,29 +1010,22 @@ namespace Matrix
             uint rowIndex = 0;
             while (colIndex < RowReducedEchelonForm.columns && rowIndex < RowReducedEchelonForm.rows)
             {
-                uint swapIndex = rowIndex + 1;
+                uint swapIndex = rowIndex;
                 while (RowReducedEchelonForm.values[rowIndex, colIndex] == 0)
                 {
+                    swapIndex++;
                     if (swapIndex >= RowReducedEchelonForm.rows)
                     {
-                        return RowReducedEchelonForm;
+                        swapIndex = rowIndex;
+                        colIndex++;
+                        if (colIndex >= RowReducedEchelonForm.columns)
+                        {
+                            return RowReducedEchelonForm;
+                        }
                     }
                     if (RowReducedEchelonForm.values[swapIndex, colIndex] != 0)
                     {
                         RowReducedEchelonForm.SwapRows(rowIndex, swapIndex);
-                    }
-                    else
-                    {
-                        swapIndex++;
-                        if (swapIndex >= RowReducedEchelonForm.rows)
-                        {
-                            swapIndex = rowIndex + 1;
-                            colIndex++;
-                            if (colIndex >= RowReducedEchelonForm.columns)
-                            {
-                                return RowReducedEchelonForm;
-                            }
-                        }
                     }
                 }
                 double pivot = RowReducedEchelonForm.values[rowIndex, colIndex];
@@ -965,13 +1042,72 @@ namespace Matrix
             }
             return RowReducedEchelonForm;
         }
-        public static Matrix RREF (Matrix matrix)
+        public static Matrix RREF(Matrix matrix)
         {
             return RowReducedEchelonForm(matrix);
         }
 
+        // ReducedRowEcechelonForm : Solves a system of linear equations through RREF and returns the RREF and solution vector
+        public static (Matrix,Matrix) RowReducedEchelonForm(Matrix matrix, Matrix results)
+        {
+            Matrix RowReducedEchelonForm = Copy(matrix);
+            Matrix SolutionVector = Copy(results);
+            if (SolutionVector.columns != 1)
+            {
+                Console.WriteLine("ERROR: Solution vector provided is not single dimensional...");
+                return (null,null);
+            }
+            if (SolutionVector.rows != RowReducedEchelonForm.rows)
+            {
+                Console.WriteLine("ERROR: Solution vector provided does not have same number of rows as system of linear equations...");
+                return (null, null);
+            }
+            uint colIndex = 0;
+            uint rowIndex = 0;
+            while (colIndex < RowReducedEchelonForm.columns && rowIndex < RowReducedEchelonForm.rows)
+            {
+                uint swapIndex = rowIndex;
+                while (RowReducedEchelonForm.values[rowIndex, colIndex] == 0)
+                {
+                    swapIndex++;
+                    if (swapIndex >= RowReducedEchelonForm.rows)
+                    {
+                        swapIndex = rowIndex;
+                        colIndex++;
+                        if (colIndex >= RowReducedEchelonForm.columns)
+                        {
+                            return (RowReducedEchelonForm, SolutionVector);
+                        }
+                    }
+                    if (RowReducedEchelonForm.values[swapIndex, colIndex] != 0)
+                    {
+                        RowReducedEchelonForm.SwapRows(rowIndex, swapIndex);
+                        SolutionVector.SwapRows(rowIndex, swapIndex);
+                    }
+                }
+                double pivot = RowReducedEchelonForm.values[rowIndex, colIndex];
+                RowReducedEchelonForm.SwapRows(rowIndex, DivideArray(RowReducedEchelonForm.RowValues(rowIndex), pivot));
+                SolutionVector.SwapRows(rowIndex, DivideArray(SolutionVector.RowValues(rowIndex), pivot));
+                for (uint elimIndex = 0; elimIndex < RowReducedEchelonForm.rows; elimIndex++)
+                {
+                    if (RowReducedEchelonForm.values[elimIndex, colIndex] != 0 && elimIndex != rowIndex)
+                    {
+                        SolutionVector.SwapRows(elimIndex, AddArrays(SolutionVector.RowValues(elimIndex), MultiplyArray(SolutionVector.RowValues(rowIndex), -RowReducedEchelonForm.values[elimIndex, colIndex])));
+                        RowReducedEchelonForm.SwapRows(elimIndex, AddArrays(RowReducedEchelonForm.RowValues(elimIndex), MultiplyArray(RowReducedEchelonForm.RowValues(rowIndex), -RowReducedEchelonForm.values[elimIndex, colIndex])));
+                    }
+                }
+                colIndex++;
+                rowIndex++;
+            }
+            return (RowReducedEchelonForm, SolutionVector);
+        }
+        public static (Matrix,Matrix) RREF (Matrix matrix, Matrix results)
+        {
+            return RowReducedEchelonForm(matrix, results);
+        }
+
         // PLUDecomposition (PLU): Returns the Permutation Matrix, Lower Triangular Matrix, and Upper Triangular Matrix decomposition of a given Matrix as a tuple
-        public static (Matrix, Matrix, Matrix) PLUDecomposition (Matrix matrix)
+        public static (Matrix, Matrix, Matrix) PLUDecomposition(Matrix matrix)
         {
             Matrix PermutationMatrix = Identity(matrix.rows);
             Matrix LowerTriangularMatrix;
@@ -1014,7 +1150,7 @@ namespace Matrix
                 }
 
                 LowerTriangularMatrix.values[colIndex, colIndex] = 1;
-                if (UpperTriangularMatrix.values[colIndex,colIndex] == 0)
+                if (UpperTriangularMatrix.values[colIndex, colIndex] == 0)
                 {
                     continue;
                 }
@@ -1034,13 +1170,13 @@ namespace Matrix
             PermutationMatrix = Transpose(PermutationMatrix);
             return (PermutationMatrix, LowerTriangularMatrix, UpperTriangularMatrix);
         }
-        public static (Matrix, Matrix, Matrix) PLU (Matrix matrix)
+        public static (Matrix, Matrix, Matrix) PLU(Matrix matrix)
         {
             return PLUDecomposition(matrix);
         }
 
         // Inverse (Inv): Returns the Inverse of a matrix through Gauss-Jordan Elimination of an augmented matrix
-        public static Matrix Inverse (Matrix matrix)
+        public static Matrix Inverse(Matrix matrix)
         {
             if (matrix.rows != matrix.columns)
             {
@@ -1054,7 +1190,7 @@ namespace Matrix
             for (uint diagIndex = 0; diagIndex < matrix.rows; diagIndex++)
             {
                 uint swapIndex = diagIndex;
-                while (augment.values[diagIndex,diagIndex] == 0)
+                while (augment.values[diagIndex, diagIndex] == 0)
                 {
                     swapIndex++;
                     if (swapIndex >= matrix.rows)
@@ -1062,7 +1198,7 @@ namespace Matrix
                         Console.WriteLine("ERROR: Matrix not invertible...");
                         return null;
                     }
-                    if (augment.values[swapIndex,diagIndex] != 0)
+                    if (augment.values[swapIndex, diagIndex] != 0)
                     {
                         inverse.SwapRows(swapIndex, diagIndex);
                         augment.SwapRows(swapIndex, diagIndex);
@@ -1072,23 +1208,23 @@ namespace Matrix
                 augment.SwapRows(diagIndex, DivideArray(augment.RowValues(diagIndex), augment.values[diagIndex, diagIndex]));
                 for (uint rowIndex = 0; rowIndex < matrix.rows; rowIndex++)
                 {
-                    if(rowIndex == diagIndex)
+                    if (rowIndex == diagIndex)
                     {
                         continue;
                     }
                     inverse.SwapRows(rowIndex, AddArrays(inverse.RowValues(rowIndex), MultiplyArray(inverse.RowValues(diagIndex), -augment.values[rowIndex, diagIndex])));
-                    augment.SwapRows(rowIndex, AddArrays(augment.RowValues(rowIndex), (MultiplyArray(augment.RowValues(diagIndex), -augment.values[rowIndex,diagIndex]))));
+                    augment.SwapRows(rowIndex, AddArrays(augment.RowValues(rowIndex), (MultiplyArray(augment.RowValues(diagIndex), -augment.values[rowIndex, diagIndex]))));
                 }
             }
             return inverse;
         }
-        public static Matrix Inv (Matrix matrix)
+        public static Matrix Inv(Matrix matrix)
         {
             return Inverse(matrix);
         }
 
         // Determinant (Det): Returns the Determinant of a square matrix by LU decomposition
-        public static double Determinant (Matrix matrix)
+        public static double Determinant(Matrix matrix)
         {
             if (matrix.rows != matrix.columns)
             {
@@ -1118,7 +1254,7 @@ namespace Matrix
                 }
                 for (uint rowIndex = diagIndex + 1; rowIndex < matrix.rows; rowIndex++)
                 {
-                    UpperTriangularMatrix.SwapRows(rowIndex, AddArrays(UpperTriangularMatrix.RowValues(rowIndex), (MultiplyArray(UpperTriangularMatrix.RowValues(diagIndex), -(UpperTriangularMatrix.values[rowIndex, diagIndex]/UpperTriangularMatrix.values[diagIndex,diagIndex])))));
+                    UpperTriangularMatrix.SwapRows(rowIndex, AddArrays(UpperTriangularMatrix.RowValues(rowIndex), (MultiplyArray(UpperTriangularMatrix.RowValues(diagIndex), -(UpperTriangularMatrix.values[rowIndex, diagIndex] / UpperTriangularMatrix.values[diagIndex, diagIndex])))));
                 }
             }
 
@@ -1128,9 +1264,9 @@ namespace Matrix
             }
             return determinant;
         }
-        public static double Det (Matrix matrix)
+        public static double Det(Matrix matrix)
         {
             return Determinant(matrix);
         }
-    }   
+    }
 }
